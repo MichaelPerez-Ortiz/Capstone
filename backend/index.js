@@ -2,7 +2,9 @@ import express from "express"
 import cors from "cors"
 import "dotenv/config"
 import connectDb from "./db.js"
-
+import Unit from "./models/Unit.js"
+import Map from "./models/Map.js"
+import Dialogue from "./models/Dialogue.js"
 
 
 const app = express()
@@ -10,6 +12,93 @@ const PORT = process.env.PORT
 
 app.use(express.json())
 app.use(cors())
+
+
+//Routes
+
+
+
+//Unit Routes
+
+//GET
+
+app.get("/api/units" , async(req , res) => {
+try {
+
+    const units = await Unit.find();
+    res.json(units);
+
+    } catch(error) {
+        res.status(500).json({message: error.message});
+    }
+});
+
+app.get("/api/units/:id" , async(req , res) => {
+try {
+
+    const unit = await Unit.findById(req.params.id);
+
+    if(!unit) {
+        return res.status(404).json({message: "Unit Not Found"});
+
+    }
+        res.json(unit);
+
+    } catch(error) {
+        res.status().json({message: error.message});
+    }
+});
+
+//POST
+
+app.post("/api/units" , async(req , res) => {
+
+    const unit = new Unit({
+        name: req.body.name ,
+        loyalty: req.body.loyalty ,
+        class: req.body.class ,
+        stats: req.body.stats ,
+        position: req.body.position ,
+        isUnlocked: req.body.isUnlocked 
+    });
+
+try {
+
+    const newUnit = await unit.save();
+    res.status(201).json(newUnit)
+
+    } catch(error) {
+        res.status(400).json({message: error.message});
+    }
+});
+
+//PUT
+
+app.put("/api/units/:id" , async(req , res) => {
+try {
+
+    const updateUnit = await unit.findByIdAndUpdate(req.params.id , req.body , {new: true});
+    res.json(updateUnit);
+
+    } catch(error) {
+        res.status(400).json({message: error.message});
+    }
+});
+
+//DELETE
+
+app.delete("/api/units/:id" , async(req , res) => {
+try {
+
+    await Unit.findByIdAndDelete(req.params.id);
+    res.json({message: "Unit Deleted"});
+
+    } catch(error) {
+        res.status(500).json({message: error.message});
+    }
+});
+
+
 
 
 
