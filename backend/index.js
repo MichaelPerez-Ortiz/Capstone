@@ -18,7 +18,7 @@ app.use(cors())
 
 
 
-//Unit Routes
+//Unit Routes//
 
 //GET
 
@@ -100,7 +100,7 @@ try {
 
 
 
-//Map Routes
+//Map Routes//
 
 //GET
 app.get("api/maps" , async(req ,res) => {
@@ -184,11 +184,62 @@ try {
 });
 
 
-//Dialogue Routes
+//Dialogue Routes//
 
 
+//GET
+
+app.get("/api/dialogue/:stageId/:category" , async(req , res) => {
+try {
+
+    const dialogue = await Dialogue.findOne({
+        stageId: req.params.stageId ,
+        category: req.params.category
+    });
+
+    if(!dialogue) {
+        return res.status(404).json({message: "Dialogue Not Found"});
+
+    }
+        res,json(dialogue);
 
 
+    } catch(error) {
+        res.status(500).json({message: error.message});
+    }
+});
+
+//POST
+
+app.post("/api/dialogue" , async(req , res) => {
+    
+    const dialogue = new Dialogue({
+        stageId: req.body.stageId ,
+        scene: req.body.scene ,
+        category: req.body.category 
+    });
+
+try{
+    const newDialogue = await dialogue.save();
+    res.status(201).json(newDialogue);
+
+    } catch(error) {
+        res.status(400).json({message: error.message});
+    }
+});
+
+//PUT
+
+app.put("/api/dialogue/:id" , async(req , res) => {
+try {
+
+    const updatedDialogue = await Dialogue.findByIdAndUpdate(req.params.id , req.body , {new: true});
+    res.json(updatedDialogue);
+
+    } catch(error) {
+        res.status(400).json({message: error.message});
+    }
+});
 
 
 
