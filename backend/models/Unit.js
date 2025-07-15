@@ -47,4 +47,4 @@ unitSchema.index({type: 1});
 
 
 
-export default mongoose.model("Unit" , UnitSchema)
+export default mongoose.model("Unit" , unitSchema)
