@@ -5,10 +5,13 @@ import connectDb from "./db.js"
 import Unit from "./models/Unit.js"
 import Map from "./models/Map.js"
 import Dialogue from "./models/Dialogue.js"
+import cloudinary from "./config/cloudinary.js"
 
 
 const app = express()
 const PORT = process.env.PORT
+
+connectDb()
 
 app.use(express.json())
 app.use(cors())
@@ -45,7 +48,7 @@ try {
         res.json(unit);
 
     } catch(error) {
-        res.status().json({message: error.message});
+        res.status(500).json({message: error.message});
     }
 });
 
@@ -59,7 +62,9 @@ app.post("/api/units" , async(req , res) => {
         class: req.body.class ,
         stats: req.body.stats ,
         position: req.body.position ,
-        isUnlocked: req.body.isUnlocked 
+        isUnlocked: req.body.isUnlocked ,
+        portrait: req.body.portrait ,
+        description: req.body.description 
     });
 
 try {
@@ -77,7 +82,7 @@ try {
 app.put("/api/units/:id" , async(req , res) => {
 try {
 
-    const updateUnit = await unit.findByIdAndUpdate(req.params.id , req.body , {new: true});
+    const updateUnit = await Unit.findByIdAndUpdate(req.params.id , req.body , {new: true});
     res.json(updateUnit);
 
     } catch(error) {
@@ -103,7 +108,7 @@ try {
 //Map Routes//
 
 //GET
-app.get("api/maps" , async(req ,res) => {
+app.get("/api/maps" , async(req ,res) => {
 try {
 
     const maps = await Map.find().sort({chapter: 1})
@@ -115,10 +120,10 @@ try {
 });
 
 
-app.get("api/maps/:chapter" , async(req ,res) => {
+app.get("/api/maps/:chapter" , async(req ,res) => {
 try {
 
-    const maps = await Map.findOne({chapter: req.params.chapter})
+    const map = await Map.findOne({chapter: req.params.chapter})
     .populate("enemyUnits")
     .populate("allyUnits")
     
@@ -143,11 +148,12 @@ app.post("/api/maps" , async(req , res) => {
          grid: req.body.grid ,
          chapter: req.body.chapter ,
          enemyUnits: req.body.enemyUnits ,
-         allyUnits: req.body.allyUnits
+         allyUnits: req.body.allyUnits ,
+         image: req.body.image
     });
 try {
 
-    const newMap = await Map.save();
+    const newMap = await map.save();
     res.status(201).json(newMap);
 } catch(error) {
     res.status(400).json({message: error.message})
@@ -162,7 +168,7 @@ app.put("/api/maps/:id" , async(req ,res) => {
 try {
 
     const updateMap = await Map.findByIdAndUpdate(req.params.id , req.body , {new:true});
-    res,json(updateMap);
+    res.json(updateMap);
 
 
     } catch(error) {
@@ -201,7 +207,7 @@ try {
         return res.status(404).json({message: "Dialogue Not Found"});
 
     }
-        res,json(dialogue);
+        res.json(dialogue);
 
 
     } catch(error) {
@@ -216,7 +222,8 @@ app.post("/api/dialogue" , async(req , res) => {
     const dialogue = new Dialogue({
         stageId: req.body.stageId ,
         scene: req.body.scene ,
-        category: req.body.category 
+        category: req.body.category ,
+        backgroundImage: req.body.backgroundImage 
     });
 
 try{

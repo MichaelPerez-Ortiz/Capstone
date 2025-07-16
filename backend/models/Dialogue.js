@@ -18,6 +18,11 @@ const dialogueSchema = new mongoose.Schema({
         type: String ,
         enum: ["intro" , "outro"] ,
         required: true
+    }, 
+
+    backgroundImage: {
+        type: String ,
+        default: ""
     }
 });
 

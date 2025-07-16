@@ -35,6 +35,10 @@ const mapSchema = new mongoose.Schema({
         ref:  "Unit"
         
     }],
+    image: {
+        type: String ,
+        default: ""
+    }
 }); 
 
 

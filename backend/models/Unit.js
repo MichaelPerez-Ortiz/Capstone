@@ -36,6 +36,15 @@ const unitSchema = new mongoose.Schema({
     isUnlocked: {
         type: Boolean ,
         default: false
+    },
+
+    portrait: {
+        type: String ,
+        default: ""
+    },
+
+    description: {
+        type: String 
     }
 });
 
