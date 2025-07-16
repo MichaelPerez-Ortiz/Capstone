@@ -108,3 +108,34 @@ try {
 };
 
 
+
+//Dialogue calls
+
+//GET
+
+export const getDialogue = async(stageId , category) => {
+try {
+
+    const response = await axios.get(`${BASE_URL}/dialogue/${stageId}/${category}`);
+    return response.data;
+
+    } catch(error) {
+        console.error("Error Getting Dialogue Scene:" , error);
+        throw error;
+    }
+};
+
+//POST
+
+export const createDialogue = async(dialogueData) => {
+try {
+
+    const response = await axios.post(`${BASE_URL}/dialogue` , dialogueData);
+    return response.data;
+
+    } catch(error) {
+        console.error("Error Creating Dialogue Scene:" , error);
+        throw error;
+    }
+};
+
