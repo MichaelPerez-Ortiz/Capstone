@@ -2,6 +2,36 @@ import mongoose from "mongoose";
 
 
 
+const spawnPointSchema = new mongoose.Schema({
+    x: Number ,
+    y: Number ,
+    maxSPawns: {
+        type: Number ,
+        default: 3
+    },
+
+    frequency: {
+        type: Number ,
+        default: 2
+    },
+
+    unitName: String ,
+    unitClass: {
+        type: String ,
+        enum: ["infantry" , "cavalry" , "flyer"] 
+    },
+
+    unitStats: {
+        hp: Number ,
+        atk: Number ,
+        def: Number ,
+        spd: Number ,
+        mov: Number
+    }
+});
+
+
+
 const mapSchema = new mongoose.Schema({
 
     name: {
@@ -38,7 +68,9 @@ const mapSchema = new mongoose.Schema({
     image: {
         type: String ,
         default: ""
-    }
+    },
+
+    spawnPoints: [spawnPointSchema]
 }); 
 
 
