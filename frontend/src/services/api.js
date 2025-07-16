@@ -23,7 +23,7 @@ export const getUnitById = async(id) => {
 try {
 
     const response = await axios.get(`${BASE_URL}/units/${id}`);
-    return response.data
+    return response.data;
 
     } catch(error) {
         console.error(`Error Getting Unit ${id}:` , error);
@@ -61,5 +61,50 @@ try {
     }
 };
 
+
+
+//Map calls
+
+
+//GET
+export  const getMaps = async() => {
+try {
+
+    const response = await axios.get(`${BASE_URL}/maps`);
+    return response.data;
+
+    } catch(error) {
+        console.error("Error Getting Maps:" , error);
+        throw error;
+    }
+};    
+
+
+export const getMapByChapter = async(chapter) => {
+try {
+
+    const response = await axios.get(`${BASE_URL}/maps/${chapter}`);
+    return response.data;
+
+    } catch(error) {
+        console.error(`Error Getting Chapter ${chapter} Map:` , error);
+        throw error;
+    }
+};  
+
+
+//POST
+
+export const createMap = async(mapData) => {
+try {
+
+    const response = await axios.post(`${BASE_URL}/maps` , mapData)
+    return response.data;
+
+    } catch(error) {
+        console.error("Error Creating Map:" , error);
+        throw error;
+    }
+};
 
 
