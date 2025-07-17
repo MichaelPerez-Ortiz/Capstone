@@ -1,5 +1,6 @@
 import { useEffect , useRef , useState} from "react";
-import {drawGrid , drawUnit , drawSpawnPoints , movementRange} from "../utils/canvas.js";
+import {drawGrid , drawUnit , drawSpawnPoints} from "../utils/canvas.js";
+import { movementRange } from "../utils/mapLogic.js";
 
 
 
