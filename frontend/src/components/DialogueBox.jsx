@@ -27,4 +27,4 @@ function DialogueBox({dialogue , currentIndex , next}) {
     );
 }
 
-export default DialogueBox
+export default DialogueBox;
