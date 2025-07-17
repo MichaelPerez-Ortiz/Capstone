@@ -1,4 +1,4 @@
-import UnitPortrait from "./UnitPortrait";
+import UnitPortrait from "./UnitPortrait.jsx";
 
 function UnitCard({unit , isSelected , onClick}) {
     return (
