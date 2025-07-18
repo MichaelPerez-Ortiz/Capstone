@@ -10,8 +10,8 @@ const dialogueSchema = new mongoose.Schema({
 
     scene: [{
         speaker: String ,
-        portrait: string ,
-        text: string
+        portrait: String ,
+        text: String
     }],
 
     category: {

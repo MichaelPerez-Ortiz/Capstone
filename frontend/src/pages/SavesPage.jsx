@@ -4,7 +4,7 @@ import { getSavesList , createNewSave , deleteSave , loadGame } from "../service
 import SaveItem from "../components/SaveItem.jsx";
 
 
-function SavesPage(setCurrentSaveId , setCurrentSaveId) {
+function SavesPage(currentSaveId , setCurrentSaveId) {
 
   const [saves , setSaves] = useState([]);
   const [newSaveName , setNewSaveName] = useState("");
@@ -36,7 +36,7 @@ function SavesPage(setCurrentSaveId , setCurrentSaveId) {
     deleteSave(saveId);
     loadSaves();
 
-    if(setCurrentSaveId === saveId) {
+    if(currentSaveId === saveId) {
       setCurrentSaveId(null);
     }
   };
@@ -60,7 +60,7 @@ function SavesPage(setCurrentSaveId , setCurrentSaveId) {
             <SaveItem
             key = {save.id}
             save = {save}
-            isActive={setCurrentSaveId === save.id}
+            isActive={currentSaveId === save.id}
             onLoad={handleLoadSave}
             onDelete={handleDeleteSave}
             />
