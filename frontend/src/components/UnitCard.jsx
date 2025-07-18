@@ -54,4 +54,4 @@ function UnitCard({unit , isSelected , onClick}) {
     );
 }
 
-export default UnitCard
+export default UnitCard;

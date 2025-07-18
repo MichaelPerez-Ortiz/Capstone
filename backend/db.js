@@ -11,4 +11,4 @@ async function connectDb() {
     }
 }
 
-export default connectDb
+export default connectDb;
