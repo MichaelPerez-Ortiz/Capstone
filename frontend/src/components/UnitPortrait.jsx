@@ -1,21 +1,21 @@
 
 
-function UnitPortrait({unit , size = "medium" , onCLick}) {
+function UnitPortrait({unit , size = "medium" , onCLick , shouldFlip = false}) {
     if(!unit || !unit.unitPortrait) {
         return (
-            <div className = {`unitPortrait unitPortrait--${size} unitPortrait--placeholder`}
+            <div className = {`unitPortrait unitPortrait--${size} unitPortrait--placeholder ${shouldFlip ? "unitPortrait--flipped" : ""}`}
             onClick = {onCLick}>
 
                 <div className = "portraitPlaceholder">
-                    {unit?.name?.charAT(0) || "?"}
+                    {unit?.name?.charAt(0) || "?"}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className = {`unitPortrait unitPortrait--${size}`}
-        conClick = {onCLick}>
+        <div className = {`unitPortrait unitPortrait--${size} ${shouldFlip ? "unitPortrait--flipped" : ""}`}
+        onClick = {onCLick}>
             <img src = {unit.portrait} alt = {unit.name} className = "portraitImage"/>
             {size !== "small" && (
                 <div className = "portraitName">

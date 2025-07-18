@@ -12,7 +12,7 @@ function DialogueBox({dialogue , currentIndex , next}) {
 
      <div className = "dialogueBox" onClick={next}>
             <div className = {`dialoguePortrait dialoguePortrait--${currentScene.position}`}>
-                <UnitPortrait unit = {currentScene.speakerId} size = "large"/>
+                <UnitPortrait unit = {currentScene.speakerId} size = "large" shouldFlip = {currentScene.position === "left"}/>
             </div>
     
 
