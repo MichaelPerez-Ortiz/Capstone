@@ -74,8 +74,59 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
         }
     } , [currenChapter , selectedUnits]);
 
+
+
+    //Actions
     const handleTileClick = (x , y) => {
         if(turn !== "player" || gameStatus !== "playing" || isPaused)
             return;
+
+        if(selectedAction === "move" && activeUnit) {
+            if(canvas.isValidMove(x , y , activeUnit , terrain , allUnits)) {
+                moveUnit(activeUnit , x , y);
+                setSelectedAction(null);
+                return;
+            }
+        }
+
+
+        if(selectedAction === "attack" && activeUnit) {
+            if(canvas.isValidAttack(x , y)) {
+                attackUnit(activeUnit , x , y);
+                setSelectedAction(null);
+                return;
+            }
+        }
+
+
+        const clickedUnit = allUnits.find(unit =>
+            unit.position &&
+            unit.position.x === x &&
+            unit.position.y === y &&
+            unit.loyalty === "ally" &&
+            !unit.hasMoved
+        );
+
+        if(clickedUnit) {
+            setActiveUnit(clickedUnit);
+            setSelectedAction(null);
+            return;
+        }
+        setActiveUnit(null);
+        setSelectedAction(null);
+    };
+
+    constHandleTileHover = (x , y) => {
+        setHoveredTile({x , y});
+    };
+
+
+
     }
-}
+
+
+
+
+  
+
+export default BattlePage;
