@@ -20,7 +20,7 @@ export const createNewSave = (playerName = "player") => {
         unlockedUnits: []
     };
 
-    return savedGame(newSave)
+    return saveGame(newSave)
 };
 
 

@@ -4,7 +4,7 @@ import { getSavesList , createNewSave , deleteSave , loadGame } from "../service
 import SaveItem from "../components/SaveItem.jsx";
 
 
-function SavesPage(currentSaveId , setCurrentSaveId) {
+function SavesPage({currentSaveId , setCurrentSaveId}) {
 
   const [saves , setSaves] = useState([]);
   const [newSaveName , setNewSaveName] = useState("");

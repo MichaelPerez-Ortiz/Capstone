@@ -1,7 +1,8 @@
 
 function SaveItem({save , isActive , onLoad , onDelete}) {
     const formatDate = (dateString) => {
-        return date.toLocalDateString() + "" + date.toLocalTimeString();
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + "" + date.toLocaleTimeString();
     };
 
     return (
