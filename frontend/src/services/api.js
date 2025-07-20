@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const BASE_URL = import.meta.env.VITE_API_URL
+const BASE_URL = import.meta.env.VITE_BASE_URL
 
 
 //Unit calls
@@ -139,3 +139,32 @@ try {
     }
 };
 
+
+//World Map Calls
+
+
+//GET
+
+export const getWorldMap = async() => {
+try {
+
+    const response = await axios.get(`${BASE_URL}/worldMap`);
+    return response.data;
+  } catch(error) {
+    console.error("Erro Getting World Map:" , error);
+    throw error;
+  }
+};
+
+//POST
+
+export const saveWorldMap = async(worldMapData) => {
+try {
+
+    const response = await axios.post(`${BASE_URL}/worldMap` , worldMapData);
+    return response.data;
+  } catch(error) {
+    console.error("Erro Saving World Map:" , error);
+    throw error;
+  }
+};

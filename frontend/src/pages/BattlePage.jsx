@@ -3,11 +3,12 @@ import {useNavigate} from "react-router-dom";
 import { getMapByChapter } from "../services/api.js";
 import {saveGame} from "../services/localStorage.js";
 import { isValidMove , terrainName , terrainDescription } from "../utils/mapLogic.js";
+import * as canvas from "../utils/canvas.js";
 import BattleMap from "../components/BattleMap.jsx";
 import UnitInfo from "../components/UnitInfo.jsx";
 
 
-function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGameState}) {
+function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGameState}) {
     const [map , setMap] = useState(null);
     const [terrain , setTerrain] = useState([]);
     const [allUnits , setAllUnits] = useState([]);
@@ -29,7 +30,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
     useEffect(() => {
         const fetchMapData = async () => {
     try {
-        const mapData = await getMapByChapter(currenChapter);
+        const mapData = await getMapByChapter(currentChapter);
         setMap(mapData);
 
         setTerrain(JSON.parse(JSON.stringify(mapData.grid)));
@@ -69,10 +70,10 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
     }
         };
 
-        if(currenChapter) {
+        if(currentChapter) {
             fetchMapData();
         }
-    } , [currenChapter , selectedUnits]);
+    } , [currentChapter , selectedUnits]);
 
 
 
@@ -82,7 +83,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
             return;
 
         if(selectedAction === "move" && activeUnit) {
-            if(canvas.isValidMove(x , y , activeUnit , terrain , allUnits)) {
+            if(isValidMove(x , y , activeUnit , terrain , allUnits)) {
                 moveUnit(activeUnit , x , y);
                 setSelectedAction(null);
                 return;
@@ -91,7 +92,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
 
 
         if(selectedAction === "attack" && activeUnit) {
-            if(canvas.isValidAttack(x , y)) {
+            if(isValidAttack(x , y)) {
                 attackUnit(activeUnit , x , y);
                 setSelectedAction(null);
                 return;
@@ -354,7 +355,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
                 const newPosition = {x: enemy.position.x + direction.x , y: enemy.position.y + direction.y};
                 
 
-                if(canvas.isValidMove(newPosition.x , newPosition.y , enemy , terrain , updatedUnits)) {
+                if(isValidMove(newPosition.x , newPosition.y , enemy , terrain , updatedUnits)) {
                     updatedUnits = updatedUnits.map(unit => {
                         if(unit._id === enemy._id) {
                             return {
@@ -416,14 +417,14 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
         if(gameState && saveId) {
             const updatedGameState = {
             ...gameState ,
-            completedChapters: [...gameState.completedChapters , currenChapter] ,
-            currenChapter: currenChapter + 1
+            completedChapters: [...gameState.completedChapters , currentChapter] ,
+            currentChapter: currentChapter + 1
         };
         saveGame(updatedGameState);
         setGameState(updatedGameState);
 
         setTimeout(() => {
-            navigate(`/cutscene/${currenChapter}/outro`);
+            navigate(`/cutscene/${currentChapter}/outro`);
         } , 2000);
      }
     };
@@ -453,7 +454,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
     return (
         <div className = "battlePage">
             <div className = "battleHeader">
-                <h2> - Chapter {currenChapter} - {map?.name} </h2>
+                <h2> - Chapter {currentChapter} - {map?.name} </h2>
                 <div className = "battleStatus">
                     <p> Turn: {currentTurn} ({turn === "player" ? "Player" : "Enemy"}) </p>
                     <p> Status: {gameStatus === "playing" ? "In Progress" : gameStatus} </p>
@@ -505,9 +506,9 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
 
                     {hoveredTile && terrain[hoveredTile.y] && (
                         <div className = "battleTile">
-                            <p><strong> Terrain </strong> {canvas.getTerrainName(terrain[hoveredTile.y][hoveredTile.x])}</p>
-                            <p> {activeUnit ? canvas.getTerrainDescription(terrain[hoveredTile.y][hoveredTile.x] , activeUnit.class) :
-                                canvas.getTerrainDescription(terrain[hoveredTile.y][hoveredTile.x])}</p>      
+                            <p><strong> Terrain </strong> {terrainName(terrain[hoveredTile.y][hoveredTile.x])}</p>
+                            <p> {activeUnit ? terrainDescription(terrain[hoveredTile.y][hoveredTile.x] , activeUnit.class) :
+                                terrainDescription(terrain[hoveredTile.y][hoveredTile.x])}</p>      
                         </div>
                     )}
                 </>
@@ -517,7 +518,7 @@ function BattlePage({selectedUnits , currenChapter , gameState , saveId , setGam
             {gameStatus === "victory" && (
                 <div className = "battleVictoryPage">
                     <h2> Victory </h2>
-                    <p> You Have Completed Chapter {currenChapter} </p>
+                    <p> You Have Completed Chapter {currentChapter} </p>
                 </div>
             )}
 

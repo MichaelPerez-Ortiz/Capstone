@@ -6,6 +6,7 @@ import Unit from "./models/Unit.js"
 import Map from "./models/Map.js"
 import Dialogue from "./models/Dialogue.js"
 import cloudinary from "./config/cloudinary.js"
+import WorldMap from "./models/WorldMap.js"
 
 
 const app = express()
@@ -255,3 +256,66 @@ try {
 app.listen(PORT , () => {
     console.log("Server running on port" , PORT)
 })
+
+
+//World Map Routes
+
+
+//GET
+app.get("/api/worldMap" , async(req , res) => {
+try{
+
+    let worldMap = await WorldMap.findOne({isActive: true});
+
+    if(!worldMap) {
+        worldMap = new WorldMap({
+            name: "World Map" ,
+            isActive: true});
+            await worldMap.save();
+    }
+
+    if(worldMap.battleMaps && worldMap.battleMaps.length > 0) {
+        await worldMap.populate("battleMaps");
+    } else {
+
+        const allMaps = await Map.find().sort({chapter: 1});
+        worldMap.battleMaps = allMaps.map(map => map._id);
+        await worldMap.save();
+        await worldMap.populate("battleMaps");
+    }
+    res.json(worldMap);
+
+    } catch(error) {
+        console.error("Error Getting World Map" , error);
+        res.status(500).json({message: error.message});
+    }
+});
+
+//POST
+
+app.post("/api/worldMap" , async(req , res) => {
+try{
+
+    const {name , imageUrl , regions , battleMaps , isActive} = req.body;
+
+    let worldMap = await WorldMap.findOne({isActive: true});
+
+    if(!worldMap) {
+        worldMap = new WorldMap({isActive: true});
+    }
+
+    if(name) worldMap.name = name;
+    if(imageUrl) worldMap.imageUrl = imageUrl;
+    if(regions) worldMap.regions = regions;
+    if(battleMaps) worldMap.battleMaps = battleMaps;
+    if(isActive !== undefined) worldMap.isActive = isActive;
+
+    await worldMap.save();
+    res.json(worldMap);
+
+    } catch(error) {
+        res.status(500).json({message: error.message});
+    }
+});
+
+

@@ -31,20 +31,20 @@ export const saveGame = (saveData) => {
     const updateSaveData = {
         ...saveData ,
         id: saveId ,
-        laastSaved: new Date().toISOString()
+        lastSaved: new Date().toISOString()
     };
 
     const existingSaveIndex = savesList.findIndex(save => save.id === saveId);
     if(existingSaveIndex >= 0) {
         savesList[existingSaveIndex] = {
             id: saveId ,
-            name: saveData.playerName || savesList[existingSaveIndex].name ,
+            playerName: saveData.playerName || savesList[existingSaveIndex].playerName ,
             date: new Date().toISOString()
         };
     } else {
         savesList.push({
             id: saveId ,
-            name: saveData.playerName || "New Save" ,
+            playerName: saveData.playerName || "New Save" ,
             date: new Date().toISOString()
         });
     }

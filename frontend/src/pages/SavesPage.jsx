@@ -1,6 +1,6 @@
 import { useState , useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSavesList , createNewSave , deleteSave , loadGame } from "../services/localStorage.js";
+import { getSavesList , createNewSave , deleteSave , loadGame , saveGame } from "../services/localStorage.js";
 import SaveItem from "../components/SaveItem.jsx";
 
 
@@ -8,6 +8,7 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
 
   const [saves , setSaves] = useState([]);
   const [newSaveName , setNewSaveName] = useState("");
+  const [saveMessage , setSaveMessage] = useState("")
   const navigate = useNavigate();
 
 
@@ -21,6 +22,7 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
   };
 
   const handleLoadSave = (saveId) => {
+    console.log("SavesPage - Setting currentSaveId:", saveId);
     setCurrentSaveId(saveId);
     navigate("/worldMap");
   };
@@ -32,6 +34,19 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
     navigate("/worldMap");
   };
 
+  const handleSaveGame = (saveId) => {
+    const currentGame = loadGame(saveId);
+    if(currentGame) {
+      saveGame(currentGame);
+      setSaveMessage("Saved");
+      setTimeout(() => setSaveMessage("") , 3000);
+      loadSaves();
+    } else {
+      setSaveMessage("Failed to Save");
+      setTimeout(() => setTimeout("") , 3000);
+    }
+  };
+
   const handleDeleteSave = (saveId) => {
     deleteSave(saveId);
     loadSaves();
@@ -41,14 +56,34 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
     }
   };
 
+  const handleKeyDown = (event) => {
+    if(event.key === "Enter") {
+      handleCreateNewSave();
+    }
+  };
+
 
 
   return (
     <div className = "savesPage">
       <h2> Game Saves </h2>
 
+      {saveMessage && (<div className = "saveMessage"
+          style = {{
+            backgroundColor: saveMessage.includes("success") ? "#4CAF50" : "#f44336" ,
+            color: "white" ,
+            padding: "10px" ,
+            borderRadius: "5px" ,
+            margin: "10px 0" ,
+            textAlignlign: "center" ,
+            fontWeight: "bold"
+          }}> {saveMessage} </div>
+        
+        )}
+
       <div className = "newSave">
-        <input type = "text" placeholder = "Enter Save Name" value = {newSaveName} onChange = {(event) => setNewSaveName(event.target.value)} className = "saveInput"/>
+        <input type = "text" placeholder = "Enter Save Name" value = {newSaveName} onChange = {(event) => setNewSaveName(event.target.value)}
+        onKeyDown = {handleKeyDown}  className = "saveInput"/>
         <button onClick = {handleCreateNewSave} className = "saveButton"> Create New Save </button>
       </div>
 
@@ -63,6 +98,7 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
             isActive={currentSaveId === save.id}
             onLoad={handleLoadSave}
             onDelete={handleDeleteSave}
+            onSave={handleSaveGame}
             />
           ))
         )}

@@ -1,5 +1,5 @@
 import { useState , useEffect } from 'react';
-import { BrowserRouter as Router , Routes , Route } from 'react-router-dom';
+import { BrowserRouter as Router , Routes , Route , Navigate} from 'react-router-dom';
 import { loadGame } from './services/localStorage.js';
 import HomePage from './pages/HomePage.jsx';
 import BattlePage from './pages/BattlePage.jsx';
@@ -15,16 +15,35 @@ import './App.css'
 
 function App() {
 
-  const [currentSaveId , setCurrentSaveId] = useState(null);
+  // const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
+  //   return localStorage.getItem("currentSaveId") || null;});
+
+const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
+  const saveId = localStorage.getItem("currentSaveId");
+  console.log("App.jsx - localStorage currentSaveId:" , saveId);
+  return saveId || null;
+});
+
   const [gameState , setGameState] = useState(null);
   const [selectedUnits , setSelectedUnits] = useState([]);
   const [currentChapter , setCurrentChapter] = useState(null);
 
+  const setCurrentSaveId = (saveId) => {
+      console.log("App.jsx - Setting currentSaveId in localStorage:", saveId);
+    setCurrentSaveIdState(saveId);
+
+    if(saveId) {
+      localStorage.setItem("currentSaveId" , saveId);
+    } else {
+      localStorage.removeItem("currentSaveId");
+    }
+  };
+
 
     useEffect(() => {
-      if(currentSaveId) {
-        const savedState = loadGame(currentSaveId);
-
+      if(currentSaveIdState) {
+        const savedState = loadGame(currentSaveIdState);
+       
         if(savedState) {
           setGameState(savedState);
           setCurrentChapter(savedState.currentChapter);
@@ -32,12 +51,13 @@ function App() {
       } else {
         setGameState(null);
       }
-    } , [currentSaveId]);
+    } , [currentSaveIdState]);
 
+     console.log("App.jsx - currentSaveIdState:", currentSaveIdState);
 
   return (
     <Router>
-      <Navbar hasActiveSave={!!currentSaveId}/>
+      <Navbar hasActiveSave={!!currentSaveIdState}/>
       <div className = "appContent">
         <Routes>
 
@@ -45,7 +65,7 @@ function App() {
             <Route path = "/battle" element = {<BattlePage selectedUnits={selectedUnits} 
                 currentChapter={currentChapter}
                 gameState={gameState}
-                saveId={currentSaveId}
+                saveId={currentSaveIdState}
                 setGameState={setGameState}/>}/>
 
             <Route path = "/unitSelect" element = {<UnitSelectPage selectedUnits = {selectedUnits}
@@ -53,11 +73,11 @@ function App() {
                 currentChapter = {currentChapter}
                 gameState = {gameState}/>}/>
 
-            <Route path = "/worldMap" element = {<WorldMapPage setCurrentChapter = {setCurrentChapter} gameState = {gameState}/>}/>
+            <Route path = "/worldMap" element = {<WorldMapPage setCurrentChapter = {setCurrentChapter} gameState = {gameState} currentSaveId = {currentSaveIdState}/>}/>
 
             <Route path = "/cutscene/:stageId/:category" element = {<CutscenePage/>}/>
 
-            <Route path = "/saves" element = {<SavesPage currentSaveId = {currentSaveId} setCurrentSaveId = {setCurrentSaveId}/>}/>
+            <Route path = "/saves" element = {<SavesPage currentSaveId = {currentSaveIdState} setCurrentSaveId = {setCurrentSaveId}/>}/>
 
         </Routes>
       </div>

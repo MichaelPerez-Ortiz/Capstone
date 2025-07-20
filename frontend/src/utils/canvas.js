@@ -128,7 +128,253 @@ export const drawUnit = (ctx , unit , x , y , size) => {
         };
 
 
+//World Map HTML Canvas
+
+export const drawWorldMap = (ctx , width , height , maps , gameState) => {
+    ctx.clearRect(0 , 0 , width , height);
+
+    const gradient = ctx.createLinearGradient(0 , 0 , 0 , height);
+        gradient.addColorStop(0 , "#87CEEB"); 
+        gradient.addColorStop(0.7 , "#98FB98");
+        gradient.addColorStop(1 , "#8FBC8F"); 
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0 , 0 , width , height);
+
+        drawTerrain(ctx , width , height);
+        drawMapPaths(ctx , maps , width , height);
+
+        maps.forEach((map , index) => {
+            const position = getMapNodePos(index , maps.length , width , height);
+            drawMapNode(ctx , map , position , gameState);
+        });
+};
+
+const drawTerrain = (ctx , width , height) => {
+    ctx.fillStyle = "#8B7355";//Mountain
+    ctx.beginPath();
+
+    ctx.moveTo(width * 0.2 , height * 0.3);
+    ctx.lineTo(width * 0.25 , height * 0.15);
+    ctx.lineTo(width * 0.3 , height * 0.25);
+    ctx.lineTo(width * 0.35 , height * 0.1);
+    ctx.lineTo(width * 0.4 , height * 0.2);
+    ctx.lineTo(width * 0.45 , height * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(width * 0.6 , height * 0.4);
+    ctx.lineTo(width * 0.65 , height * 0.25);
+    ctx.lineTo(width * 0.7 , height * 0.35);
+    ctx.lineTo(width * 0.75 , height * 0.2);
+    ctx.lineTo(width * 0.8 , height * 0.4);
+    ctx.closePath();
+    ctx.fill();
+
+    //Forests
+    ctx.fillStyle = "#228B22";
+    drawForest(ctx , width * 0.1 , height * 0.6, 80, 60);
+    drawForest(ctx , width * 0.7 , height * 0.7, 100, 80);
+    drawForest(ctx , width * 0.4 , height * 0.8, 120, 70);
+
+    //Water
+    ctx.strokeStyle = "#4169E1";
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(width * 0.1 , height * 0.2);
+    ctx.quadraticCurveTo(width * 0.3 , height * 0.4 , width * 0.5 , height * 0.3);
+    ctx.quadraticCurveTo(width * 0.7 , height * 0.2 , width * 0.9 , height * 0.5);
+    ctx.stroke();
+    };
+//TreeGroup
+    const drawForest = (ctx , x , y , width , height) => {
+    const treeCount = 15;
+
+    for(let i = 0; i < treeCount; i++) {
+        const treeX = x + (Math.random() * width);
+        const treeY = y + (Math.random() * height);
+        const treeSize = 8 + (Math.random() * 12);
+
+
+        ctx.fillStyle = "#8B4513";
+        ctx.fillRect(treeX - 2 , treeY + treeSize / 2 , 4 , treeSize / 2);
+
+
+        ctx.fillStyle = "#228B22";
+        ctx.beginPath();
+        ctx.arc(treeX , treeY , treeSize / 2 , 0 , Math.PI * 2);
+        ctx.fill();
+    }
+};
+
+//Map Node Position
+const getMapNodePos = (index , totalMaps , canvasWidth , canvasHeight) => {
+    const padding = 80;
+    const usableWidth = canvasWidth - (padding * 2);
+    const usableHeight = canvasHeight - (padding * 2);
+
+//Path
+const pathPoints = [
+
+    { x: 0.15 , y: 0.8 } , 
+    { x: 0.3 , y: 0.6 } , 
+    { x: 0.2 , y: 0.4 } , 
+    { x: 0.4 , y: 0.3 } , 
+    { x: 0.6 , y: 0.5 } , 
+    { x: 0.8 , y: 0.3 } , 
+    { x: 0.7 , y: 0.15 } , 
+    { x: 0.85 , y: 0.1 } , 
+];
+
+    if (index < pathPoints.length) {
+        return {
+            x: padding + (pathPoints[index].x * usableWidth),
+            y: padding + (pathPoints[index].y * usableHeight)
+        };
+        } else {
+        
+        const progress = index / (totalMaps - 1);
+        return {
+            x: padding + (progress * usableWidth),
+            y: padding + (usableHeight * 0.5)
+        };
+     }
+};
+
+
+const drawMapPaths = (ctx , maps , canvasWidth , canvasHeight) => {
+    if (maps.length < 2) 
+        return;
+
+            ctx.strokeStyle = "#8B4513";
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10 , 5]);
+
+            ctx.beginPath();
+
+            for (let i = 0; i < maps.length - 1; i++) {
+                const currentPos = getMapNodePos(i , maps.length , canvasWidth , canvasHeight);
+                const nextPos = getMapNodePos(i + 1 , maps.length , canvasWidth , canvasHeight);
+
+            if (i === 0) {
+                ctx.moveTo(currentPos.x , currentPos.y);
+            }
+
+
+            const midX = (currentPos.x + nextPos.x) / 2;
+            const midY = (currentPos.y + nextPos.y) / 2;
+            const controlX = midX + (Math.random() - 0.5) * 50;
+            const controlY = midY + (Math.random() - 0.5) * 50;
+
+            ctx.quadraticCurveTo(controlX , controlY , nextPos.x , nextPos.y);
+        }
+
+            ctx.stroke();
+            ctx.setLineDash([]); 
+    };
+
+//Nodes
+const drawMapNode = (ctx , map , position , gameState) => {
+    const nodeRadius = 35;
+    const { x , y } = position;
+
+
+    const isCompleted = gameState.completedChapters.includes(map.chapter);
+    const isAvailable = map.chapter <= gameState.currentChapter;
+    const isLocked = !isAvailable;
 
 
 
+  ctx.fillStyle = "rgba(0 , 0 , 0 , 0.3)";
+  ctx.beginPath();
+  ctx.arc(x + 3 , y + 3 , nodeRadius , 0 , Math.PI * 2);
+  ctx.fill();
+  
+ 
+    if (isCompleted) {
 
+        ctx.fillStyle = "#4CAF50";
+    } else if (isAvailable) {
+
+        ctx.fillStyle = "#2196F3";
+    } else {
+
+        ctx.fillStyle = "#9E9E9E";
+    }
+    
+  ctx.beginPath();
+  ctx.arc(x , y , nodeRadius , 0 , Math.PI * 2);
+  ctx.fill();
+  
+
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  //Chapter Number
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 18px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(map.chapter.toString() , x , y - 5);
+  
+
+    if (isCompleted) {
+        ctx.fillStyle = "#FFD700"; 
+        ctx.font = "16px Arial";
+        ctx.fillText("⭐" , x , y + 12);//Star
+    } else if (isLocked) {
+
+        ctx.fillStyle = "#666666";
+        ctx.font = "14px Arial";
+        ctx.fillText("🔒" , x , y + 12);
+    }
+  
+  //Map Name
+  ctx.fillStyle = "#333333";
+  ctx.font = "bold 12px Arial";
+  ctx.textAlign = "center";
+  const maxWidth = nodeRadius * 2;
+  const text = map.name;
+  
+
+  const words = text.split(" ");
+  let line = "";
+  let lines = [];
+  
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+    
+        if (testWidth > maxWidth && n > 0) {
+            lines.push(line);
+            line = words[n] + " ";
+        } else {
+            line = testLine;
+        }
+    }
+    lines.push(line);
+  
+
+  lines.forEach((line , index) => {
+    ctx.fillText(line.trim(), x , y + nodeRadius + 20 + (index * 15));
+  });
+};
+
+//Clicked Node
+export const getClickedMapNode = (mouseX , mouseY , maps , canvasWidth , canvasHeight) => {
+    const nodeRadius = 35;
+  
+  for (let i = 0; i < maps.length; i++) {
+    const position = getMapNodePos(i , maps.length , canvasWidth , canvasHeight);
+        const distance = Math.sqrt(Math.pow(mouseX - position.x , 2) + Math.pow(mouseY - position.y , 2));
+    
+    if (distance <= nodeRadius) {
+      return maps[i];
+    }
+  }
+  
+  return null;
+};

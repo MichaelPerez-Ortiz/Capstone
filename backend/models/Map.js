@@ -41,11 +41,12 @@ const mapSchema = new mongoose.Schema({
     },
 
     description: {
-        type: String ,
-        grid: {
-            type: [[Number]] ,
-            required: true
-        }
+        type: String
+    },
+
+    grid: {
+        type: [[Number]] ,
+        required: true
     },
 
     chapter: {
