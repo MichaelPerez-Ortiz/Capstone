@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 const spawnPointSchema = new mongoose.Schema({
     x: Number ,
     y: Number ,
-    maxSPawns: {
+    maxSpawns: {
         type: Number ,
         default: 3
     },
@@ -71,14 +71,20 @@ const mapSchema = new mongoose.Schema({
         default: ""
     },
 
-    spawnPoints: [spawnPointSchema]
+    spawnPoints: [spawnPointSchema] ,
+
+    worldMapPos: {
+        x: Number ,
+        y: Number
+    }
+
 }); 
 
 
 
 //Indexes
 
-mapSchema.index({stage: 1});
+mapSchema.index({chapter: 1});
 
 
 

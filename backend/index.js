@@ -150,7 +150,9 @@ app.post("/api/maps" , async(req , res) => {
          chapter: req.body.chapter ,
          enemyUnits: req.body.enemyUnits ,
          allyUnits: req.body.allyUnits ,
-         image: req.body.image
+         image: req.body.image ,
+         spawnPoints: req.body.spawnPoints ,
+         worldMapPos: req.body.worldMapPos
     });
 try {
 
@@ -319,3 +321,40 @@ try{
 });
 
 
+//PUT
+
+app.put("/api/worldMap/:id" , async(req , res) => {
+try {
+
+    const {name , imageUrl , regions , battleMaps , isActive} = req.body;
+    const worldMap = await WorldMap.findById(req.params.id);
+
+    if(!worldMap) {
+        return res.status(404).json({message: "World Map Not Found"});
+    }
+
+    if(name) worldMap.name = name;
+    if(imageUrl) worldMap.imageUrl = imageUrl;
+    if(regions) worldMap.regions = regions;
+    if(battleMaps) worldMap.battleMaps = battleMaps;
+    if(isActive !== undefined) worldMap.isActive = isActive;
+   
+    if(isActive == true) {
+        await WorldMap.updateMany(
+            {_id: {$ne: req.params.id}} ,
+            {isActive: false}
+        );
+    }
+
+    const updateWorldMap = await worldMap.save();
+
+    if(updateWorldMap.battleMaps && updateWorldMap.battleMaps.length > 0) {
+        await updateWorldMap.populate("battleMaps");
+    }
+
+    res.json(updateWorldMap);
+  } catch(error) {
+    console.error("Error Updating World Map:" , error);
+    res.status(400).json({message: error.message});
+  }
+});

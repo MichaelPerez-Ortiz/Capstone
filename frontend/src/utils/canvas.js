@@ -144,8 +144,17 @@ export const drawWorldMap = (ctx , width , height , maps , gameState) => {
         drawTerrain(ctx , width , height);
         drawMapPaths(ctx , maps , width , height);
 
+        //Node Link
         maps.forEach((map , index) => {
-            const position = getMapNodePos(index , maps.length , width , height);
+            let position;
+            if(map.worldMapPos && map.worldMapPos.x !== undefined && map.worldMapPos.y !== undefined) {
+                position = {
+                    x: map.worldMapPos.x ,
+                    y: map.worldMapPos.y
+                };
+            } else {
+                position = getMapNodePos(index , maps.length , width , height);
+            }
             drawMapNode(ctx , map , position , gameState);
         });
 };
@@ -234,7 +243,7 @@ const pathPoints = [
         };
         } else {
         
-        const progress = index / (totalMaps - 1);
+        const progress = index / (totalMaps - 1 || 1);
         return {
             x: padding + (progress * usableWidth),
             y: padding + (usableHeight * 0.5)
@@ -253,9 +262,35 @@ const drawMapPaths = (ctx , maps , canvasWidth , canvasHeight) => {
 
             ctx.beginPath();
 
-            for (let i = 0; i < maps.length - 1; i++) {
-                const currentPos = getMapNodePos(i , maps.length , canvasWidth , canvasHeight);
-                const nextPos = getMapNodePos(i + 1 , maps.length , canvasWidth , canvasHeight);
+            const sortedMaps = [...maps].sort((a , b) => a.chapter - b.chapter);
+
+
+            for (let i = 0; i < sortedMaps.length - 1; i++) {
+                const currentMap = sortedMaps[i];
+                const nextMap = sortedMaps[i + 1];
+
+                let currentPos , nextPos;
+
+                if(currentMap.worldMapPos && currentMap.worldMapPos.x !== undefined 
+                    && currentMap.worldMapPos.y !== undefined) {
+                        currentPos = {
+                            x: currentMap.worldMapPos.x ,
+                            y: currentMap.worldMapPos.y
+                        };
+                    } else {
+                        const index = maps.findIndex(map => map._id === currentMap._id);
+                        currentPos = getMapNodePos(index , maps.length , canvasWidth , canvasHeight);
+                }
+
+                    if(nextMap.worldMapPos && nextMap.worldMapPos.x !== undefined && nextMap.worldMapPos.y !== undefined) {
+                        nextPos = {
+                            x: nextMap.worldMapPos.x ,
+                            y: nextMap.worldMapPos.y
+                        };
+                    } else {
+                        const index = maps.findIndex(map => map._id === nextMap._id);
+                        nextPos = getMapNodePos(index , maps.length , canvasWidth , canvasHeight);
+                    }
 
             if (i === 0) {
                 ctx.moveTo(currentPos.x , currentPos.y);
@@ -368,8 +403,18 @@ export const getClickedMapNode = (mouseX , mouseY , maps , canvasWidth , canvasH
     const nodeRadius = 35;
   
   for (let i = 0; i < maps.length; i++) {
-    const position = getMapNodePos(i , maps.length , canvasWidth , canvasHeight);
-        const distance = Math.sqrt(Math.pow(mouseX - position.x , 2) + Math.pow(mouseY - position.y , 2));
+    let position;
+
+    if(maps[i].worldMapPos && maps[i].worldMapPos.x !== undefined && maps[i].worldMapPos.y !== undefined) {
+        position = {
+           x: maps[i].worldMapPos.x ,
+           y: maps[i].worldMapPos.y
+    };
+} else {
+    position = getMapNodePos(i , maps.length , canvasWidth , canvasHeight);
+}
+
+    const distance = Math.sqrt(Math.pow(mouseX - position.x , 2) + Math.pow(mouseY - position.y , 2));
     
     if (distance <= nodeRadius) {
       return maps[i];

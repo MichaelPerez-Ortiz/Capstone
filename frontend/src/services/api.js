@@ -168,3 +168,16 @@ try {
     throw error;
   }
 };
+
+//PUT
+
+export const updateWorldMap = async(id , worldMapData) => {
+try {
+
+    const response = await axios.put(`${BASE_URL}/worldMap/${id}` , worldMapData);
+    return response.data;
+   } catch(error) {
+    console.error("Error Updating World Map:" , error)
+    throw error;
+   }
+};

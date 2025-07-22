@@ -52,7 +52,8 @@ const unitSchema = new mongoose.Schema({
 
 //Indexes
 
-unitSchema.index({type: 1});
+unitSchema.index({class: 1});
+unitSchema.index({loyalty: 1});
 
 
 
