@@ -47,12 +47,12 @@ try {
 };
 
 
-//PUT
+//PATCH
 
 export const updateUnit = async(id , unitData) => {
 try {
 
-    const response = await axios.put(`${BASE_URL}/units/${id}` , unitData);
+    const response = await axios.patch(`${BASE_URL}/units/${id}` , unitData);
     return response.data;
 
     } catch(error) {
@@ -108,6 +108,22 @@ try {
 };
 
 
+//PATCH
+
+export const updateMap = async(id , mapData) => {
+try {
+
+    const response = await axios.patch(`${BASE_URL}/maps/${id}` , mapData)
+    return response.data;
+
+    } catch(error) {
+        console.error(`Error Updating Map ${id}:` , error);
+        throw error;
+    }
+};
+
+
+
 
 //Dialogue calls
 
@@ -140,6 +156,22 @@ try {
 };
 
 
+//PATCH
+
+export const updateDialogue = async(id , dialogueData) => {
+try {
+
+    const response = await axios.patch(`${BASE_URL}/dialogue/${id}` , dialogueData);
+    return response.data;
+
+    } catch(error) {
+        console.error(`Error Updating Dialogue Scene ${id}:` , error);
+        throw error;
+    }
+};
+
+
+
 //World Map Calls
 
 
@@ -169,12 +201,12 @@ try {
   }
 };
 
-//PUT
+//PATCH
 
 export const updateWorldMap = async(id , worldMapData) => {
 try {
 
-    const response = await axios.put(`${BASE_URL}/worldMap/${id}` , worldMapData);
+    const response = await axios.patch(`${BASE_URL}/worldMap/${id}` , worldMapData);
     return response.data;
    } catch(error) {
     console.error("Error Updating World Map:" , error)

@@ -78,9 +78,9 @@ try {
     }
 });
 
-//PUT
+//PATCH
 
-app.put("/api/units/:id" , async(req , res) => {
+app.patch("/api/units/:id" , async(req , res) => {
 try {
 
     const updateUnit = await Unit.findByIdAndUpdate(req.params.id , req.body , {new: true});
@@ -164,9 +164,9 @@ try {
 
 });
 
-//UPDATE
+//PATCH
 
-app.put("/api/maps/:id" , async(req ,res) => {
+app.patch("/api/maps/:id" , async(req ,res) => {
 
 try {
 
@@ -238,9 +238,9 @@ try{
     }
 });
 
-//PUT
+//PATCH
 
-app.put("/api/dialogue/:id" , async(req , res) => {
+app.patch("/api/dialogue/:id" , async(req , res) => {
 try {
 
     const updatedDialogue = await Dialogue.findByIdAndUpdate(req.params.id , req.body , {new: true});
@@ -321,9 +321,9 @@ try{
 });
 
 
-//PUT
+//PATCH
 
-app.put("/api/worldMap/:id" , async(req , res) => {
+app.patch("/api/worldMap/:id" , async(req , res) => {
 try {
 
     const {name , imageUrl , regions , battleMaps , isActive} = req.body;
