@@ -482,7 +482,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             completedChapters: [...gameState.completedChapters , currentChapter] ,
             currentChapter: currentChapter + 1
         };
-        saveGame(updatedGameState);
+        saveGame(updatedGameState , saveId);
         setGameState(updatedGameState);
 
         setTimeout(() => {

@@ -213,9 +213,8 @@ useEffect(() => {
 
           for(let i = 0; i < maps.length; i++) {
             const map = maps[i];
-            const position = getMapNodePos ?
-            getMapNodePos(i , map.length , canvas.width , canvas.height) : 
-            {x: 80 + (i * (canvas.width - 160) / (maps.length - 1 || 1)) , y: canvas.height / 2};
+            const position = getMapNodePos || {
+            x: 80 + (i * (canvas.width - 160) / (maps.length - 1 || 1)) , y: canvas.height / 2};
 
             const nodeRadius = 35;
             const isCompleted = currentGameState.completedChapters.includes(map.chapter);
@@ -293,17 +292,17 @@ const handleCanvasClick = (event) => {
 
   console.log("Canvas Clicked at:" , mouseX , mouseY);
 
-  // const clickedMap = getClickedMapNode(mouseX , mouseY , maps , canvas.width , canvas.height);
+  const clickedMap = getClickedMapNode(mouseX , mouseY , maps , canvas.width , canvas.height);
 
-  // if(clickedMap) {
-  //   if(clickedMap.chapter <= currentGameState.currentChapter) {
-  //     setCurrentChapter(clickedMap.chapter);
-  //     navigate("/unitSelect");
-  //   } else {
-  //     setLockedMessage(`Chapter ${clickedMap.chapter} is Locked`);
-  //     setTimeout(() => setLockedMessage("") , 3000);
-  //   }
-  // }
+  if(clickedMap) {
+    if(clickedMap.chapter <= currentGameState.currentChapter) {
+      setCurrentChapter(clickedMap.chapter);
+      navigate("/unitSelect");
+    } else {
+      setLockedMessage(`Chapter ${clickedMap.chapter} is Locked`);
+      setTimeout(() => setLockedMessage("") , 3000);
+    }
+  }
 };
 
 // const handleChapterSelect = (chapter) => {
