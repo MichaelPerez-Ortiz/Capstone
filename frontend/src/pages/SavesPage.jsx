@@ -31,7 +31,7 @@ function SavesPage({currentSaveId , setCurrentSaveId}) {
   const handleCreateNewSave = () => {
     const newSave = createNewSave(newSaveName || "player");
     setCurrentSaveId(newSave.id);
-    navigate("/worldMap");
+    navigate("/cutscene/0/intro");
   };
 
   const handleSaveGame = (saveId) => {

@@ -7,6 +7,7 @@ import * as canvas from "../utils/canvas.js";
 import BattleMap from "../components/BattleMap.jsx";
 import UnitInfo from "../components/UnitInfo.jsx";
 
+const TILE_SIZE = 40;
 
 function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGameState}) {
     const [map , setMap] = useState(null);
@@ -35,8 +36,35 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
 
         setTerrain(JSON.parse(JSON.stringify(mapData.grid)));
 
-        if(mapData.backgroundImage) {
-            setMapImage(mapData.backgroundImage);
+        if(mapData.image) {
+            setMapImage(mapData.image);
+        }
+
+        let enemyUnits = [];
+
+        if(mapData.enemyUnits && mapData.enemyUnits.length > 0) {
+            if(mapData.initialEnemies && mapData.initialEnemies.length > 0)
+                enemyUnits = mapData.initialEnemies.map(initialEnemy => {
+            const enemyUnit = mapData.enemyUnits.find(unit =>
+                unit._id === initialEnemy.unitId
+            );
+
+            if(enemyUnit) {
+                return {
+                    ...enemyUnit ,
+                    position: initialEnemy.position ,
+                    stats: initialEnemy.customStats || enemyUnit.stats
+                };
+            }
+            return null;
+            }).filter(Boolean);
+        } else {
+            enemyUnits = mapData.enemyUnits.map((unit , index) => {
+                return {
+                    ...unit ,
+                    position : {x: 3 + index , y: 2}
+                };
+            });
         }
 
 
@@ -46,14 +74,11 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             const startX = 1 + index * 2;
             return {
                 ...unit ,
-                position: {x: startX , y: startY}
+                position: {x: startX , y: startY} ,
+                hasMoved: false
             };
         });
-
-        const enemyUnits = mapData.enemyUnits.map(unit => ({
-            ...unit ,
-        }));
-
+        
         setAllUnits([...playerUnits , ...enemyUnits]);
 
 
@@ -79,17 +104,32 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
 
     //Actions
     const handleTileClick = (x , y) => {
+            console.log("Tile Clicked:" , x , y);
         if(turn !== "player" || gameStatus !== "playing" || isPaused)
             return;
 
+        const unitAtPosition = allUnits.find(unit => 
+            unit.position && unit.position.x === x && unit.position.y === y
+        );
+        console.log("Unit at:" , unitAtPosition);
+        
+
         if(selectedAction === "move" && activeUnit) {
-            if(isValidMove(x , y , activeUnit , terrain , allUnits)) {
-                moveUnit(activeUnit , x , y);
-                setSelectedAction(null);
+            const movement = activeUnit.stats?.mov || 3;
+            const distance = Math.abs(x - activeUnit.position.x) + Math.abs(y - activeUnit.position.y);
+                
+            if(distance > movement) {
+                setActionMessage(`${activeUnit.name} Can Only Move ${movement} Tiles`);
                 return;
             }
-        }
-
+                if(isValidMove(x , y , activeUnit , terrain , allUnits)) {
+                    moveUnit(activeUnit , x , y);
+                    setSelectedAction(null);
+                    return;
+                } else {
+                    setActionMessage("Invalid Move");
+                }
+            }
 
         if(selectedAction === "attack" && activeUnit) {
             if(isValidAttack(x , y)) {
@@ -125,20 +165,20 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
     const handleUnitAction = (action , unit) => {
         if(action === "wait") {
 
-            const updatedUnits = allUnits.map(unit => {
-                if(unit._id === unit._id) {
-                    return {...unit , hasMoved: true};
+            const updatedUnits = allUnits.map(u => {
+                if(u._id === unit._id) {
+                    return {...u, hasMoved: true};
                 }
 
-                return unit;
+                return u;
             });
 
             setAllUnits(updatedUnits);
             setActiveUnit(null);
             setSelectedAction(null);
 
-            const playerUnits = updatedUnits.filter(unit => unit.loyalty === "ally");
-            const allMoved = playerUnits.every(unit => unit.hasMoved);
+            const playerUnits = updatedUnits.filter(u => u.loyalty === "ally");
+            const allMoved = playerUnits.every(u => u.hasMoved);
 
             if(allMoved) {
                 endPlayerTurn();
@@ -169,11 +209,11 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
     };
 
     const moveUnit =(unit , x , y) => {
-        const updatedUnits = allUnits.map(unit => {
-            if(unit._id === unit._id) {
-                return {...unit , position: {x , y}};
+        const updatedUnits = allUnits.map(u => {
+            if(u._id === unit._id) {
+                return {...u , position: {x , y}};
             }
-            return unit;
+            return u;
         });
         setAllUnits(updatedUnits);
     };
@@ -210,37 +250,43 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                         }
                     };
                 }
+                if(unit._id === attacker._id) {
+                    return {...unit , hasMoved: true};
+                }
                 return unit;
             });
 
-            setAllUnits(updatedUnits);
+            const survivingUnits = updatedUnits.filter(unit => unit.stats.hp > 0);
+
+            setAllUnits(survivingUnits);
 
             setActionMessage(`${attacker.name} dealt ${damage} damage to ${targetUnit.name}`);
-        } else {
-            setActionMessage(`${attacker.name}'s attack missed`);
-        }
 
-        const finalUnits = allUnits.map(unit => {
+            checkGameStatus(survivingUnits);
+
+            const playerUnits = survivingUnits.filter(unit => unit.loyalty === "ally");
+            const allMoved = playerUnits.every(unit => unit.hasMoved);
+
+            if(allMoved) {
+                endPlayerTurn();
+            }
+        } else {
+            const updatedUnits = allUnits.map(unit => {
             if(unit._id === attacker._id) {
                 return {...unit , hasMoved: true};
             }
             return unit;
         });
+            setAllUnits(updatedUnits);
+            setActionMessage(`${attacker.name}'s attack missed`);
 
-        setAllUnits(finalUnits);
-        setActiveUnit(null);
-
-        const survivingUnits = finalUnits.filter(unit => unit.stats.hp > 0);
-        setAllUnits(survivingUnits);
-
-        checkGameStatus(survivingUnits);
-
-        const playerUnits = survivingUnits.filter(unit => unit.loyalty === "ally");
-        const allMoved = playerUnits.every(unit => unit.hasMoved);
-
-        if(allMoved) {
-            endPlayerTurn();
+            const playerUnits = updatedUnits.filter(unit => unit.loyalty === "ally");
+            const allMoved = playerUnits.every(unit => unit.hasMoved);
+            if(allMoved) {
+                endPlayerTurn();
+            }
         }
+        setActiveUnit(null);
     };
 
     const endPlayerTurn = () => {
@@ -259,7 +305,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
 
         if(spawnPoints.length > 0) {
             spawnPoints.forEach((spawn , index) => {
-                if(spawn.spawned < spawn.maxSpawns && newTurnCount % spawn.turnsPerSpawn === 0) {
+                if(spawn.spawned < spawn.maxSpawns && newTurnCount % spawn.frequency === 0) {
                     const isOccupied = updatedUnits.some(unit => unit.position && unit.position.x === spawn.x && unit.position.y === spawn.y);
 
                     if(!isOccupied) {
@@ -269,18 +315,18 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                             loyalty: "enemy" ,
                             class: spawn.unitClass || "infantry" ,
                             stats: spawn.unitStats || {
-                                hp: 100 ,
-                                atk: 50 ,
-                                def: 30 ,
-                                spd: 40 ,
+                                hp: 12 ,
+                                atk: 5 ,
+                                def: 3 ,
+                                spd: 4 ,
                                 mov: 3 //Change Later
                             },
                             position: {x: spawn.x , y: spawn.y}
                         };
                         updatedUnits = [...updatedUnits , newEnemy];
 
-                        updatedSpawnPoints = updatedSpawnPoints.map((spawn , index) => {
-                            if(index === index) {
+                        updatedSpawnPoints = updatedSpawnPoints.map((spawn , i) => {
+                            if(i === index) {
                                 return {...spawn , spawned: (spawn.spawned || 0) + 1};
                             }
                             return spawn;
@@ -310,7 +356,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             let minDistance = calculateDistance(enemy.position , nearestUnit.position);
 
             playerUnits.forEach(player => {
-                const distance = calculateDistance(enemy.position , nearestUnit.position);
+                const distance = calculateDistance(enemy.position , player.position);
                 if(distance < minDistance) {
                     nearestUnit = player;
                     minDistance = distance;
@@ -331,7 +377,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                 if(attackHits) {
                     const damage = Math.max(1 , enemy.stats.atk - Math.floor(nearestUnit.stats.def / 2));
 
-                    const updatedUnits = updatedUnits.map(unit => {
+                    const newUpdatedUnits = updatedUnits.map(unit => {
                         if(unit._id === nearestUnit._id) {
                             const newHp = Math.max(0 , unit.stats.hp - damage);
                             return {
@@ -344,6 +390,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                         }
                         return unit;
                     });
+                    updatedUnits = newUpdatedUnits;
 
                     setActionMessage(`${enemy.name} dealt ${damage} damage to ${nearestUnit.name}`);
                 } else {
@@ -351,23 +398,38 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                 }
             } else {
 
+                const enemyMovement = enemy.stats?.mov || 3;
                 const direction = getDirectionToward(enemy.position , nearestUnit.position);
-                const newPosition = {x: enemy.position.x + direction.x , y: enemy.position.y + direction.y};
+                
+                let bestMove = enemy.position;
+                for(let step = 1; step <= enemyMovement; step++) {
+                    const newPosition = {
+                        x: enemy.position.x + (direction.x * step), 
+                        y: enemy.position.y + (direction.y * step)
+                    };
                 
 
                 if(isValidMove(newPosition.x , newPosition.y , enemy , terrain , updatedUnits)) {
-                    updatedUnits = updatedUnits.map(unit => {
-                        if(unit._id === enemy._id) {
-                            return {
-                                ...unit ,
-                                position: newPosition
-                            };
-                        }
-                        return unit;
-                    });
+                    bestMove = newPosition
+                } else {
+                    break;
                 }
             }
-        });
+            if(bestMove.x !== enemy.position.x || bestMove.y !== enemy.position.y) {
+                updatedUnits = updatedUnits.map(unit => {
+                    if(unit._id === enemy._id) {
+                    return {
+                        ...unit ,
+                        position: bestMove
+                    };
+
+                 }
+                    return unit;
+                });
+
+            }
+        }         
+});
         
         updatedUnits = updatedUnits.filter(unit => unit.stats.hp > 0);
 
@@ -491,8 +553,9 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                         onTileClick={handleTileClick}
                         onTileHover={handleTileHover}
                         mapImageUrl={mapImage}
-                        width = {terrain[0]?.length * 40 || 800}
-                        height = {terrain?.length * 40 || 600}
+                        width = {terrain[0]?.length * TILE_SIZE || 800}
+                        height = {terrain?.length * TILE_SIZE || 600}
+                        tileSize = {TILE_SIZE}
                     />
 
                     {activeUnit && (

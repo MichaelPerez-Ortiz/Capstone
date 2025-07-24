@@ -5,7 +5,7 @@ import DialogueBox from "../components/DialogueBox.jsx";
 
 
 
-function CutscenePage() {
+function CutscenePage({setCurrentChapter}) {
 
   const {stageId , category}  = useParams();
   const [dialogue , setDialogue] = useState(null);
@@ -17,6 +17,16 @@ function CutscenePage() {
     const fetchDialogue = async () => {
 try {
     const dialogueData = await getDialogue(stageId , category);
+
+    const loadedDialogue = {
+      ...dialogueData , 
+      scene: dialogueData.scene.map(scene => ({
+        ...scene ,
+        portrait: scene.speaker === "narrator" ? "" : scene.portrait
+      }))
+    };
+
+
     setDialogue(dialogueData);
     } catch(error) {
       console.error("Failed to Get Dialogue" , error);
@@ -33,6 +43,21 @@ try {
 
   } , [stageId , category]);
 
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if(event.key === "Tab") {
+        event.preventDefault();
+        handleDialogueComplete();
+      }
+    };
+    window.addEventListener("keydown" , handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown" , handleKeyPress);
+    };
+  } , []);
+
+
   const handleNext = () => {
     if(dialogue && currentScene < dialogue.scene.length - 1) {
       setCurrentScene(currentScene + 1);
@@ -44,11 +69,29 @@ try {
 
   const handleDialogueComplete = () => {
     if(category === "intro") {
+      if(parseInt(stageId) === 0) {
+        setCurrentChapter(1);
+        navigate("/cutscene/1/intro");
+        return;
+      }
       navigate("/battle");
     } else {
       navigate("/worldMap");
     }
   };
+
+  const getBackgroundStyle = () => {
+    if(!dialogue.backgroundImage)
+      return{};
+
+    if(dialogue.backgroundImage.includes("gradient")) {
+      return {background: dialogue.backgroundImage};
+    } else {
+      return {backgroundImage: `url(${dialogue.backgroundImage})`};
+    }
+  };
+
+
 
   if(loading) {
     return <div className = "cutsceneLoading"> Loading </div>;
@@ -61,14 +104,14 @@ try {
 
   return (
 
-    <div className = "cutscenePage" onClick = {handleNext}>
+    <div className = "cutscenePage" data-stage = {stageId} onClick = {handleNext}>
         {dialogue.backgroundImage && (
-          <div className = "cutsceneBackground" style = {{backgroundImage: `url(${dialogue.backgroundImage})`}}/>
+          <div className = "cutsceneBackground" style = {getBackgroundStyle()}/>
         )}
 
         <DialogueBox dialogue={dialogue} currentIndex={currentScene} onNext = {handleNext}/>
       
-      <div className = "sceneSkip"> Click to Continue / ESC to skip </div>
+      <div className = "sceneSkip"> Click to Continue / TAB to skip </div>
     </div>
 
   );

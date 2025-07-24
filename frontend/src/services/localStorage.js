@@ -17,7 +17,8 @@ export const createNewSave = (playerName = "player") => {
         playerName ,
         currentChapter: 1 ,
         completedChapters: [] ,
-        unlockedUnits: []
+        unlockedUnits: [] ,
+        isNewSave: true
     };
 
     return saveGame(newSave)

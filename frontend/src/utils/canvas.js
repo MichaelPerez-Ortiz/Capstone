@@ -25,7 +25,7 @@ export const drawGrid = (ctx , grid , tileSize , mapImage = null) => {
                 const terrainType = grid[y][x];
 
                 ctx.fillStyle = terrainColors[terrainType] || "#717477";
-                ctx.strokeRect(x * tileSize , y * tileSize , tileSize , tileSize);
+                ctx.fillRect(x * tileSize , y * tileSize , tileSize , tileSize);
 
                 ctx.strokeStyle = "#000000";
                 ctx.lineWidth = 1;

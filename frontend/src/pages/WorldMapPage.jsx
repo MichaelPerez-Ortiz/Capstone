@@ -80,6 +80,18 @@ try {
 
 } , []);
 
+
+useEffect(() => {
+  if(localGameState?.isNewSave && currentSaveId) {
+    const updatedGameState = {
+      ...localGameState ,
+      isNewSave:false
+    };
+    saveGame(updatedGameState);
+    setLocalGameState(updatedGameState);
+  }
+} , [localGameState , currentSaveId]);
+
 //Draw Map
 
 const drawTerrain = (ctx , width , height) => {

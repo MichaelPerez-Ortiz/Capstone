@@ -1,7 +1,7 @@
 
 
 function UnitPortrait({unit , size = "medium" , onCLick , shouldFlip = false}) {
-    if(!unit || !unit.unitPortrait) {
+    if(!unit || !unit.portrait) {
         return (
             <div className = {`unitPortrait unitPortrait--${size} unitPortrait--placeholder ${shouldFlip ? "unitPortrait--flipped" : ""}`}
             onClick = {onCLick}>

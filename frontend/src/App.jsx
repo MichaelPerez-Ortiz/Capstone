@@ -75,7 +75,7 @@ const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
 
             <Route path = "/worldMap" element = {<WorldMapPage setCurrentChapter = {setCurrentChapter} gameState = {gameState} currentSaveId = {currentSaveIdState}/>}/>
 
-            <Route path = "/cutscene/:stageId/:category" element = {<CutscenePage/>}/>
+            <Route path = "/cutscene/:stageId/:category" element = {<CutscenePage setCurrentChapter = {setCurrentChapter}/>}/>
 
             <Route path = "/saves" element = {<SavesPage currentSaveId = {currentSaveIdState} setCurrentSaveId = {setCurrentSaveId}/>}/>
 

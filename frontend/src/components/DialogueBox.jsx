@@ -8,6 +8,8 @@ function DialogueBox({dialogue , currentIndex , next}) {
     const currentScene = dialogue.scene[currentIndex];
     const isLeftSpeaker = currentScene.position === "left";
 
+    const showPortrait = currentScene.speaker.toLowerCase() !== "narrator" && currentScene.portrait;
+
     return (
 
      <div className = "dialogueBox" onClick={next}>
@@ -16,7 +18,7 @@ function DialogueBox({dialogue , currentIndex , next}) {
             </div>
     
 
-        <div className = "dialogueContent">
+        <div className = {`dialogueContent ${!showPortrait ? 'dialogueContent--full' : ''}`}>
 
             <div className = "dialogueSpeaker"> {currentScene.speaker} </div>
             <div className = "dialogueText"> {currentScene.text} </div>

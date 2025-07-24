@@ -20,31 +20,31 @@ function UnitInfo({unit , onAction}) {
             <div className = "unitStats">
                 <div className = "stat">
                     <span className = "statLabel"> HP </span>
-                    <span className = "statValue"> unit.stats.hp </span>
+                    <span className = "statValue"> {unit.stats.hp} </span>
                 </div>
             </div>
             <div className = "unitStats">
                 <div className = "stat">
                     <span className = "statLabel"> ATK </span>
-                    <span className = "statValue"> unit.stats.atk </span>
+                    <span className = "statValue"> {unit.stats.atk} </span>
                 </div>
             </div>
             <div className = "unitStats">
                 <div className = "stat">
                     <span className = "statLabel"> DEF </span>
-                    <span className = "statValue"> unit.stats.def </span>
+                    <span className = "statValue"> {unit.stats.def} </span>
                 </div>
             </div>
             <div className = "unitStats">
                 <div className = "stat">
                     <span className = "statLabel"> SPD </span>
-                    <span className = "statValue"> unit.stats.spd </span>
+                    <span className = "statValue"> {unit.stats.spd} </span>
                 </div>
             </div>
             <div className = "unitStats">
                 <div className = "stat">
                     <span className = "statLabel"> MOV </span>
-                    <span className = "statValue"> unit.stats.mov </span>
+                    <span className = "statValue"> {unit.stats.mov} </span>
                 </div>
             </div>
             

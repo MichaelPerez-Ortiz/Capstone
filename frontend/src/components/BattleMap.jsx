@@ -13,12 +13,13 @@ function BattleMap({
     onTileHover ,
     mapImageUrl = null ,
     width ,
-    height
+    height ,
+    tileSize = 60
 }) {
 
     const canvasRef = useRef(null);
     const [mapImage , setMapImage] = useState(null);
-    const tileSize = 40;
+    // const tileSize = 40;
 
     useEffect(() => {
         if(mapImageUrl) {
@@ -26,7 +27,7 @@ function BattleMap({
             img.src = mapImageUrl;
             img.onload = () => setMapImage(img);
         }
-    } , [mapImageUrl]);
+    } , [grid , units , activeUnit , spawnPoints , mapImageUrl , tileSize]);
 
     useEffect(() => {
         if(!grid || grid.length === 0)
@@ -38,13 +39,14 @@ function BattleMap({
         ctx.clearRect(0 , 0 , canvas.width , canvas.height);
 
         drawGrid(ctx , grid , tileSize , mapImage);
+        console.log("Grid data:" , grid);
 
         if(spawnPoints.length > 0) {
             drawSpawnPoints(ctx , spawnPoints , tileSize);
         }
 
         if(activeUnit) {
-            movementRange(ctx , activeUnit , grid , tileSize);
+            movementRange(ctx , activeUnit , grid , tileSize , units);
         }
 
 

@@ -859,6 +859,8 @@ button:disabled {
   border: calc(var(--pixel-size) * 2) solid var(--border-color);
   box-shadow: calc(var(--pixel-size) * 2) calc(var(--pixel-size) * 2) 0 rgba(0,0,0,0.5);
   image-rendering: pixelated;
+  max-width: 320px;
+  max-height: 320px;
 }
 
 .battleUnitInfo {
@@ -1239,4 +1241,57 @@ button:disabled {
   transform: translateY(-1px);
   position: relative;
   top: -2.5px; 
+}
+
+
+/* Required Unit */
+
+
+.required {
+  position: relative;
+  display: inline-block;
+}
+
+.requiredTip {
+  visibility: hidden;
+  width: 120px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 105%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.required:hover .requiredTip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.requiredTip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+
+
+.cutscenePage[data-stage="0"] .dialogueText {
+  text-align: center;
+  white-space: pre-wrap;
+}
+
+.dialogueContent--full {
+  width: 100%;
+  text-align: center;
 }

@@ -32,6 +32,34 @@ const spawnPointSchema = new mongoose.Schema({
 
 
 
+/////////////////////////////////////////////////
+
+
+const initialEnemySchema = new mongoose.Schema({
+    unitId: {
+        type: mongoose.Schema.Types.ObjectId ,
+        ref: "Unit"
+    },
+
+    position: {
+        x: Number ,
+        y: Number
+    },
+
+    customStats: {
+        hp: Number ,
+        atk: Number ,
+        def: Number ,
+        spd: Number ,
+        mov: Number
+    },
+
+    customName: String
+});
+
+
+////////////////////////////////////////////////////////////
+
 const mapSchema = new mongoose.Schema({
 
     name: {
@@ -71,6 +99,8 @@ const mapSchema = new mongoose.Schema({
         default: ""
     },
 
+    initialEnemies: [initialEnemySchema] ,
+
     spawnPoints: [spawnPointSchema] ,
 
     worldMapPos: {
@@ -80,11 +110,6 @@ const mapSchema = new mongoose.Schema({
 
 }); 
 
-
-
-//Indexes
-
-mapSchema.index({chapter: 1});
 
 
 
