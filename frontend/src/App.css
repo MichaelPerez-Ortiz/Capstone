@@ -717,6 +717,48 @@ button:disabled {
   font-family: 'Press Start 2P', cursive;
 }
 
+.unitPlacement {
+    background-color: rgba(245, 245, 220, 0.9);
+    border: 2px solid #6b4423;
+    padding: 15px;
+    margin-left: 10px;
+    max-width: 250px;
+    max-height: 400px;
+}
+
+.unitPlacementList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.unitPlacementOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.unitPlacementOption:hover {
+    background-color: rgba(107, 68, 35, 0.1);
+    border: 1px solid #6b4423;
+}
+
+
+.finishPlacement {
+    width: 100%;
+    font-size: 12px;
+}
+
+.finishPlacement:hover {
+    background-color: #8b5a33; /* #5a381d */
+}
+
+
 
 /* UnitInfo */
 
@@ -789,6 +831,7 @@ button:disabled {
   background-size: cover;
   background-position: center;
   image-rendering: pixelated;
+  /* padding: 0; */
 }
 
 .battleHeader {
@@ -849,18 +892,22 @@ button:disabled {
 }
 
 .battleMain {
-  flex: 1;
   display: flex;
+  flex: 1;
   position: relative;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
 }
 
 .battleMap {
-  flex: 1;
   border: calc(var(--pixel-size) * 2) solid var(--border-color);
   box-shadow: calc(var(--pixel-size) * 2) calc(var(--pixel-size) * 2) 0 rgba(0,0,0,0.5);
   image-rendering: pixelated;
-  max-width: 320px;
-  max-height: 320px;
+  display: block;
+  margin: 0 auto;
+  /* max-width: 320px;
+  max-height: 320px; */
 }
 
 .battleUnitInfo {
@@ -877,6 +924,7 @@ button:disabled {
   background-size: calc(var(--pixel-size) * 4) calc(var(--pixel-size) * 4);
   background-position: 0 0, calc(var(--pixel-size) * 2) calc(var(--pixel-size) * 2);
 }
+
 
 .battleTile {
   position: absolute;

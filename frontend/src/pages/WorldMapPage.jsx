@@ -5,9 +5,7 @@ import { drawWorldMap , getClickedMapNode } from "../utils/canvas.js";
 import { loadGame, saveGame } from "../services/localStorage.js";
 
 
-function WorldMapPage({setCurrentChapter , gameState , currentSaveId}) {
-
-   console.log("WorldMapPage.jsx - currentSaveId prop:", currentSaveId);
+function WorldMapPage({setCurrentChapter , gameState , currentSaveId , onChapterSelect}) {
 
   const [maps , setMaps] = useState([]);
   const [loading , setLoading] = useState(true);
@@ -297,7 +295,12 @@ const handleCanvasClick = (event) => {
   if(clickedMap) {
     if(clickedMap.chapter <= currentGameState.currentChapter) {
       setCurrentChapter(clickedMap.chapter);
+
+      if(onChapterSelect) {
+        onChapterSelect(clickedMap.chapter);
+      } else {
       navigate("/unitSelect");
+      }
     } else {
       setLockedMessage(`Chapter ${clickedMap.chapter} is Locked`);
       setTimeout(() => setLockedMessage("") , 3000);
@@ -312,7 +315,6 @@ const handleCanvasClick = (event) => {
 
 
 if(loading) {
-  console.log("Showing loading screen - loading:", loading);
   return <div className = "worldMapLoading"> Loading World Map </div>;
 }
 

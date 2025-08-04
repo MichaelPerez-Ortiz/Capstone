@@ -423,3 +423,26 @@ export const getClickedMapNode = (mouseX , mouseY , maps , canvasWidth , canvasH
   
   return null;
 };
+
+
+export const drawValidPlacement = (ctx , validTiles , tileSize) => {
+    validTiles.forEach(tile => {
+        ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+        ctx.fillRect(tile.x * tileSize , tile.y * tileSize , tileSize , tileSize);
+        ctx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tile.x * tileSize , tile.y * tileSize , tileSize , tileSize);
+    });
+};
+
+export const drawSelectedTile = (ctx , selectedTile , tileSize) => {
+    if(!selectedTile)
+        return;
+
+    ctx.fillStyle = "rgba(0, 0, 255, 0.5)";
+     ctx.fillRect(selectedTile.x * tileSize , selectedTile.y * tileSize , tileSize , tileSize);
+        ctx.strokeStyle = "rgba(0, 0, 255, 1)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(selectedTile.x * tileSize , selectedTile.y * tileSize , tileSize , tileSize);
+
+};

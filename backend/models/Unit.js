@@ -38,6 +38,27 @@ const unitSchema = new mongoose.Schema({
         default: false
     },
 
+    unlockChapter: {
+        type: Number ,
+        default: null
+    },
+
+    unlockCondition: {
+        type: String ,
+        enum: ["start" , "during" , "victory" , "talk"] ,
+        default: "victory"
+    },
+
+    recruitmentDialogue: {
+        type: String ,
+        default: null
+    },
+
+    recruiterUnit: {
+        type: String ,
+        default: ""
+    },
+
     portrait: {
         type: String ,
         default: ""

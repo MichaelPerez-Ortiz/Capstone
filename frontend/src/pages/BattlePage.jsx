@@ -6,8 +6,9 @@ import { isValidMove , terrainName , terrainDescription } from "../utils/mapLogi
 import * as canvas from "../utils/canvas.js";
 import BattleMap from "../components/BattleMap.jsx";
 import UnitInfo from "../components/UnitInfo.jsx";
+import { checkUnitUnlock , getRecruitableUnits , canRecruit , unlockUnit } from "../utils/unitUnlocks.js";
 
-const TILE_SIZE = 40;
+// const TILE_SIZE = 40;
 
 function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGameState}) {
     const [map , setMap] = useState(null);
@@ -24,13 +25,35 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
     const [mapImage , setMapImage] = useState(null);
     const [hoveredTile , setHoveredTile] = useState(null);
     const [actionMessage , setActionMessage] = useState("");
+    const [isPlacingUnits , setIsPlacingUnits] = useState(false);
+    const [unitsToPlace , setUnitsToPlace] = useState([]);
+    const [placedUnits , setPlacedUnits] = useState([]);
+    const [selectedTile , setSelectedTile] = useState(null);
+    const [recruitableUnits , setRecruitableUnits] = useState([]);
 
     const navigate = useNavigate();
+
+    const gridWidth = terrain[0]?.length;
+    const gridHeight = terrain?.length;
+
+    const maxCanvasWidth = Math.min(window.innerWidth * 0.85 , 1400);
+    const maxCanvasHeight= Math.min(window.innerHeight * 0.75 , 900);
+
+    const bestTileSize = Math.min(
+        Math.floor(maxCanvasWidth / gridWidth) ,
+        Math.floor(maxCanvasHeight / gridHeight) ,
+        100
+    );
+
+    const canvasWidth = gridWidth * bestTileSize;
+    const canvasHeight = gridHeight * bestTileSize;
 
 
     useEffect(() => {
         const fetchMapData = async () => {
     try {
+            console.log("Selected units:", selectedUnits);
+
         const mapData = await getMapByChapter(currentChapter);
         setMap(mapData);
 
@@ -43,7 +66,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
         let enemyUnits = [];
 
         if(mapData.enemyUnits && mapData.enemyUnits.length > 0) {
-            if(mapData.initialEnemies && mapData.initialEnemies.length > 0)
+            if(mapData.initialEnemies && mapData.initialEnemies.length > 0) {
                 enemyUnits = mapData.initialEnemies.map(initialEnemy => {
             const enemyUnit = mapData.enemyUnits.find(unit =>
                 unit._id === initialEnemy.unitId
@@ -66,23 +89,85 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                 };
             });
         }
+    }
+    
+    if(currentChapter === 1) {
+
+        const preplacedAllies = [
+            {
+            _id: "688156ede3215acf2ca3c4e6" , 
+            name: "Kirsa" ,
+            loyalty: "ally" ,
+            class: "infantry" ,
+            stats: {
+                hp: 23 , 
+                atk: 6 ,
+                def: 7 ,
+                spd: 13 ,
+                mov: 5
+            },
+            isUnlocked: true ,
+            portrait: "https://res.cloudinary.com/navg-3d/image/upload/v1753278981/Kirsa_hvauef.png" ,
+            position: {x: 2, y: 5} ,
+            hasMoved: false
+        },
+        {
+            _id: "6880f724d3e3fbb6df5b3378" ,
+            name: "Kara" ,
+            loyalty: "ally" ,
+            class: "cavalry" ,
+            stats: {
+                hp: 22,
+                atk: 7,
+                def: 6,
+                spd: 9,
+                mov: 6
+            },
+            isUnlocked: true ,
+            portrait: "https://res.cloudinary.com/navg-3d/image/upload/v1753278980/Kara_mvhecp.png" ,
+            position: {x: 1, y: 6} ,
+            hasMoved: false
+        },
+        {
+            _id: "6880f88fd3e3fbb6df5b337c" ,
+            name: "Avitus" ,
+            loyalty: "ally" ,
+            class: "infantry" ,
+            stats: {
+                hp: 30 , 
+                atk: 14 ,
+                def: 11 ,
+                spd: 12 ,
+                mov: 7
+            },
+            isUnlocked: true ,
+            portrait: "https://res.cloudinary.com/navg-3d/image/upload/v1753278974/Avitus_o8rfay.png" ,
+            position: {x: 3, y: 6} ,
+            hasMoved: false
+        }
+        ];
+
+    setAllUnits([...enemyUnits , ...preplacedAllies]);
+    setIsPlacingUnits(false);
+    setUnitsToPlace([]);
+    setPlacedUnits([]);
+} else {
+    const uniqueUnits = [];
+    const uniqueIds = new Set();
+    selectedUnits.forEach(unit => {
+        if(!uniqueIds.has(unit._id)) {
+            uniqueIds.add(unit._id);
+            uniqueUnits.push(unit);
+        }
+    });
 
 
-        //Unit Placement
-        const playerUnits = selectedUnits.map((unit , index) => {
-            const startY = mapData.grid.length - 2;
-            const startX = 1 + index * 2;
-            return {
-                ...unit ,
-                position: {x: startX , y: startY} ,
-                hasMoved: false
-            };
-        });
-        
-        setAllUnits([...playerUnits , ...enemyUnits]);
-
-
-        if(mapData.spawnPoints) {
+    setUnitsToPlace(uniqueUnits);
+    setPlacedUnits([]);
+    setAllUnits([...enemyUnits]);
+    setIsPlacingUnits(true);
+}
+     if(mapData.spawnPoints) {
             setSpawnPoints(mapData.spawnPoints.map(spawn => ({
                 ...spawn ,
                 spawned: 0
@@ -105,6 +190,17 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
     //Actions
     const handleTileClick = (x , y) => {
             console.log("Tile Clicked:" , x , y);
+            if(isPlacingUnits) {
+                if(isValidPlacement(x , y)) {
+                    setSelectedTile({x , y});
+                           console.log("unitsToPlace:", unitsToPlace);
+        } else {
+            console.log("Invalid Placement at:", {x, y});
+        }
+                
+                return;
+            }
+
         if(turn !== "player" || gameStatus !== "playing" || isPaused)
             return;
 
@@ -143,9 +239,7 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
         const clickedUnit = allUnits.find(unit =>
             unit.position &&
             unit.position.x === x &&
-            unit.position.y === y &&
-            unit.loyalty === "ally" &&
-            !unit.hasMoved
+            unit.position.y === y
         );
 
         if(clickedUnit) {
@@ -352,6 +446,9 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             if(!updatedUnits.find(unit => unit._id === enemy._id))
                 return;
 
+            if(playerUnits.length === 0)
+                return;
+
             let nearestUnit = playerUnits[0];
             let minDistance = calculateDistance(enemy.position , nearestUnit.position);
 
@@ -509,6 +606,103 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
         navigate("/worldMap");
     };
 
+
+    const isValidPlacement = (x , y) => {
+
+        if(y < 0 || y >= terrain.length || x < 0 || x >= terrain[y].length) {
+            return false;
+        }
+
+        const tileType = terrain[y][x];
+        if(tileType === 1) {
+            return false;
+        }
+
+        const unitAtPosition = allUnits.find(unit => 
+            unit.position && unit.position.x === x && unit.position.y === y
+        );
+
+        if(unitAtPosition) {
+            console.log("Unit already at position:", unitAtPosition);
+            return false;
+        }
+
+        const placedUnitPos = placedUnits.find(unit => 
+            unit.position && unit.position.x === x && unit.position.y === y
+
+        );
+        if(placedUnitPos) {
+            return false;
+        }
+
+            const deploymentZone = Math.floor(terrain.length * 0.6);
+            if(y < deploymentZone) {
+                console.log("Outside Deployment Zone");
+                return false;
+            }
+  console.log("Valid placement");
+        return true;
+    };
+
+    const handleUnitPlacement = (unitToPlace) => {
+        console.log("Placing Unit:" , unitToPlace.name , "at" , selectedTile);
+        if(!selectedTile)
+            return;
+
+        const {x , y} = selectedTile;
+
+        const placedUnit = {
+            ...unitToPlace , 
+            position: {x , y} ,
+            hasMoved: false
+        };
+
+        const newPlacedUnits = [...placedUnits , placedUnit];
+        setPlacedUnits(newPlacedUnits);
+        console.log("New Placed Units:" , newPlacedUnits);
+
+        const remainingUnits = unitsToPlace.filter(unit => unit._id !== unitToPlace._id)
+        setUnitsToPlace(remainingUnits);
+        console.log("Remaining Units to Place:" , remainingUnits.length);
+
+        setSelectedTile(null);
+
+        if(remainingUnits.length === 0) {
+            setTimeout(() => {
+                finishUnitPlacement(newPlacedUnits);
+            } , 100);
+        
+    }
+};
+
+    const finishUnitPlacement = (finalPlacedUnits = placedUnits) => {
+        console.log("Finishing Unit Placement:" , finalPlacedUnits);
+
+        setAllUnits(prev => {
+            const newUnits = [...prev , ...finalPlacedUnits];
+            console.log("Units After Placement:" , newUnits);
+            return newUnits;
+        });
+        setIsPlacingUnits(false);
+        setUnitsToPlace([]);
+        setPlacedUnits([]);
+        setSelectedTile(null);
+    };
+
+    const getValidPlacement = () => {
+        const validTiles = [];
+        for (let y = 0; y < terrain.length; y++) {
+            for (let x = 0; x < terrain[y].length; x++) {
+                if(isValidPlacement(x , y)) {
+                    validTiles.push({x , y});
+                }
+            }
+        }
+        return validTiles;
+    };
+
+
+
     if(loading) {
         return <div className = "battleLoading"> Loading Battle </div>;
     }
@@ -518,16 +712,23 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             <div className = "battleHeader">
                 <h2> - Chapter {currentChapter} - {map?.name} </h2>
                 <div className = "battleStatus">
-                    <p> Turn: {currentTurn} ({turn === "player" ? "Player" : "Enemy"}) </p>
-                    <p> Status: {gameStatus === "playing" ? "In Progress" : gameStatus} </p>
+                    {isPlacingUnits ? (
+                        <p> Place Units ({unitsToPlace.length} Remaining) </p>
+                    ) : (
+                    <>
+                        <p> Turn: {currentTurn} ({turn === "player" ? "Player" : "Enemy"}) </p>
+                        <p> Status: {gameStatus === "playing" ? "In Progress" : gameStatus} </p>
+                    </>
+                    )}
                 </div>
             </div>
+            {!isPlacingUnits && (
 
             <div className = "battleControls">
                 <button className = "battleButton" onClick = {handlePause}> {isPaused ? "Resume" : "Pause"} </button>
                 <button className = "battleButton" onClick = {handleSaveGame}> Save Game </button>
                 <button className = "battleButton" onClick = {handleQuit}> Quit to World Map </button>
-            </div>
+            </div>)}
 
             {actionMessage && (
                 <div className = "battleMessage">
@@ -536,6 +737,60 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
             )}
 
             <div className = "battleMain">
+                {isPlacingUnits ? (
+                    <>
+                    <BattleMap
+                        grid = {terrain}
+                        units={[...allUnits , ...placedUnits]}
+                        spawnPoints={spawnPoints}
+                        activeUnit={null}
+                        onTileClick={handleTileClick}
+                        onTileHover={handleTileHover}
+                        mapImageUrl={mapImage}
+                        width = {canvasWidth}
+                        height = {canvasHeight}
+                        tileSize = {bestTileSize}
+                        validPlacement = {getValidPlacement()}
+                        selectedTile = {selectedTile}
+                    />
+
+                    {selectedTile && unitsToPlace.length > 0 && (
+                        <div className = "unitPlacement">
+                            <h3> Choose Unit</h3>
+                            <div className = "unitPlacementList">
+                                {unitsToPlace.map(unit => (
+                                    <div key = {unit._id} className = "unitPlacementOption" onClick = {() => handleUnitPlacement(unit)}>
+                                        <div style = {{
+                                            width: "40px" ,
+                                            height: "40px" ,
+                                            overflow: "hidden" ,
+                                            border: "2px solid #6b4423",
+                                            position: "relative"
+                                        }}>
+                                        <img src = {unit.portrait} alt = {unit.name} 
+                                        style = {{
+                                            width: "65px" ,
+                                            height: "60px" ,
+                                            objectFit: "cover" ,
+                                            position: "absolute" ,
+                                            top: "-1px" ,
+                                            left: "-12px"
+                                        }}
+                                        />
+                                        </div>
+                                        <span> {unit.name} </span>
+                                        </div>
+                                ))}
+                            </div>
+
+                            {unitsToPlace.length > 0 && (
+                                <button onClick = {() => finishUnitPlacement()} className = "finishPlacement"> Finish </button>
+                            )}
+                        </div>
+                    )}
+                    </>
+                ) : (
+                    <>
                 {isPaused ? (
                     <div className = "battlePause">
                         <h3> Paused </h3>
@@ -553,9 +808,9 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                         onTileClick={handleTileClick}
                         onTileHover={handleTileHover}
                         mapImageUrl={mapImage}
-                        width = {terrain[0]?.length * TILE_SIZE || 800}
-                        height = {terrain?.length * TILE_SIZE || 600}
-                        tileSize = {TILE_SIZE}
+                        width = {canvasWidth}
+                        height = {canvasHeight}
+                        tileSize = {bestTileSize}
                     />
 
                     {activeUnit && (
@@ -574,6 +829,8 @@ function BattlePage({selectedUnits , currentChapter , gameState , saveId , setGa
                                 terrainDescription(terrain[hoveredTile.y][hoveredTile.x])}</p>      
                         </div>
                     )}
+                </>
+                )}
                 </>
                 )}
             </div>

@@ -20,7 +20,6 @@ function App() {
 
 const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
   const saveId = localStorage.getItem("currentSaveId");
-  console.log("App.jsx - localStorage currentSaveId:" , saveId);
   return saveId || null;
 });
 
@@ -29,7 +28,6 @@ const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
   const [currentChapter , setCurrentChapter] = useState(null);
 
   const setCurrentSaveId = (saveId) => {
-      console.log("App.jsx - Setting currentSaveId in localStorage:", saveId);
     setCurrentSaveIdState(saveId);
 
     if(saveId) {
@@ -53,7 +51,16 @@ const [currentSaveIdState , setCurrentSaveIdState] = useState(() => {
       }
     } , [currentSaveIdState]);
 
-     console.log("App.jsx - currentSaveIdState:", currentSaveIdState);
+
+     const handleChapterSelect = (chapter) => {
+      setCurrentChapter(chapter);
+
+      if(chapter === 1) {
+        navigate("/battle");
+      } else {
+        navigate("/unitSelect");
+      }
+     };
 
   return (
     <Router>
